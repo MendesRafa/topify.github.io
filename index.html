@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="index.js"></script>
+  </head>
+
+  <body>
+    <div style="display: flex; justify-content: center">
+      <button
+        style="
+          font-size: 36px;
+          background: none;
+          outline: none;
+          border: none;
+          cursor: pointer;
+        "
+        onclick="goToLast();"
+      >
+        &#171;
+      </button>
+      <button
+        style="
+          font-size: 36px;
+          background: none;
+          outline: none;
+          border: none;
+          cursor: pointer;
+        "
+        onclick="decrementYear();"
+      >
+        <
+      </button>
+      <div class="year" style="display: flex; align-items: center"></div>
+      <button
+        style="
+          font-size: 36px;
+          background: none;
+          outline: none;
+          border: none;
+          cursor: pointer;
+        "
+        onclick="incrementYear();"
+      >
+        >
+      </button>
+      <button
+        style="
+          font-size: 36px;
+          background: none;
+          outline: none;
+          border: none;
+          cursor: pointer;
+        "
+        onclick="goToFirst();"
+      >
+        &#xbb;
+      </button>
+    </div>
+    <div style="display: flex">
+      <div class="left" style="display: flex; flex-direction: column">
+        <div class="bar"></div>
+        <div style="display: flex; justify-content: center">
+          <button
+            style="
+              font-size: 36px;
+              background: none;
+              outline: none;
+              border: none;
+              cursor: pointer;
+            "
+            onclick="goToLastSong();"
+          >
+            &#171;
+          </button>
+          <button
+            style="
+              font-size: 36px;
+              background: none;
+              outline: none;
+              border: none;
+              cursor: pointer;
+            "
+            onclick="decrementSong();"
+          >
+            <
+          </button>
+          <div class="song" style="display: flex; align-items: center"></div>
+          <button
+            style="
+              font-size: 36px;
+              background: none;
+              outline: none;
+              border: none;
+              cursor: pointer;
+            "
+            onclick="incrementSong();"
+          >
+            >
+          </button>
+          <button
+            style="
+              font-size: 36px;
+              background: none;
+              outline: none;
+              border: none;
+              cursor: pointer;
+            "
+            onclick="goToFirstSong();"
+          >
+            &#xbb;
+          </button>
+        </div>
+      </div>
+      <div class="scatter"></div>
+    </div>
+    <script>
+      draw();
+    </script>
+  </body>
+</html>
