@@ -28,26 +28,30 @@ function goToLast() {
 
 function incrementSong() {
   if (currentSong < 24) {
+    lastSong = currentSong;
     currentSong++;
-    updateSongViz();
+    updateSongViz(lastSong);
   }
 }
 
 function decrementSong() {
   if (currentSong > 0) {
+    lastSong = currentSong;
     currentSong--;
-    updateSongViz();
+    updateSongViz(lastSong);
   }
 }
 
 function goToFirstSong() {
   currentSong = 24;
-  updateSongViz();
+  lastSong = currentSong;
+  updateSongViz(lastSong);
 }
 
 function goToLastSong() {
   currentSong = 0;
-  updateSongViz();
+  lastSong = currentSong;
+  updateSongViz(lastSong);
 }
 
 function processData(data) {
@@ -205,8 +209,17 @@ function drawScatter(canvas, data, key, position, yrange) {
     .attr('cy', function (d) {
       return y(d[key]);
     })
-    .attr('r', 2)
-    .style('fill', '#69b3a2');
+    .attr('class', function (d) {
+      return d.title.replace(/[^a-z0-9]/gi, '');
+    })
+    .attr('r', 2.5)
+    .style('fill', function (d) {
+      if (data[currentSong].title === d.title) {
+        return '#cd2026';
+      } else {
+        return '#0071bc';
+      }
+    });
 }
 
 function drawBar(canvas, data) {
@@ -245,7 +258,7 @@ function drawBar(canvas, data) {
     .attr('y', (d) => y(d[0]))
     .attr('width', (d) => x(0))
     .attr('height', y.bandwidth())
-    .attr('fill', '#69b3a2')
+    .attr('fill', '#0071bc')
     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
   canvas
@@ -284,10 +297,92 @@ function drawSongSection(data) {
     .select('.song')
     .append('text')
     .attr('text-anchor', 'middle')
+    .style('text-align', 'center')
+    .style('width', '500px')
     .style('font-size', '26px')
+    .style('text-overflow', 'ellipsis')
+    .style('white-space', 'nowrap')
+    .style('overflow', 'hidden')
     .style('font-weight', 'bold')
     .style('padding', '1px')
-    .text(data[currentSong].title);
+    .text('#' + (currentSong + 1) + ' ' + data[currentSong].title);
+
+  const radial = d3
+    .select('.radial')
+    .append('svg')
+    .attr('width', 950)
+    .attr('height', 350);
+
+  const radialScale = d3.scaleLinear().domain([0, 100]).range([0, 150]);
+  const ticks = [20, 40, 60, 80, 100];
+
+  ticks.forEach((tick) => {
+    radial
+      .append('circle')
+      .attr('cx', 950 / 2)
+      .attr('cy', 350 / 2)
+      .attr('fill', 'none')
+      .attr('stroke', 'gray')
+      .attr('r', radialScale(tick));
+
+    radial
+      .append('text')
+      .attr('x', 950 / 2)
+      .attr('y', 350 / 2 - radialScale(tick) - 5)
+      .attr('text-anchor', 'middle')
+      .text(tick.toString());
+  });
+
+  const attributes = ['nrgy', 'dnce', 'live', 'val', 'acous', 'spch'];
+  const coordinates = [];
+  for (let index in attributes) {
+    const angle = Math.PI + (2 * Math.PI * index) / attributes.length;
+    const line_coordinate = angleToCoordinate(angle, 100, radialScale);
+    const label_coordinate = angleToCoordinate(angle, 115, radialScale);
+    coordinates.push(
+      angleToCoordinate(
+        angle,
+        data[currentSong][attributes[index]],
+        radialScale
+      )
+    );
+
+    radial
+      .append('line')
+      .attr('x1', 950 / 2)
+      .attr('y1', 350 / 2)
+      .attr('x2', line_coordinate.x)
+      .attr('y2', line_coordinate.y)
+      .attr('stroke', 'black');
+
+    radial
+      .append('text')
+      .attr('x', label_coordinate.x)
+      .attr('y', label_coordinate.y)
+      .attr('text-anchor', 'middle')
+      .text(attributes[index]);
+  }
+
+  const line = d3
+    .line()
+    .x((d) => d.x)
+    .y((d) => d.y);
+
+  radial
+    .append('path')
+    .datum(coordinates)
+    .attr('d', line)
+    .attr('stroke-width', 3)
+    .attr('stroke', '#cd2026')
+    .attr('fill', '#cd2026')
+    .attr('stroke-opacity', 1)
+    .attr('opacity', 0.5);
+}
+
+function angleToCoordinate(angle, value, radialScale) {
+  const x = Math.cos(angle) * radialScale(value);
+  const y = Math.sin(angle) * radialScale(value);
+  return { x: 950 / 2 + x, y: 350 / 2 - y };
 }
 
 function draw() {
@@ -324,7 +419,7 @@ function draw() {
     drawScatter(scatter, processedData[currentYear], 'spch', 5, [0, 100]);
     drawScatter(scatter, processedData[currentYear], 'live', 6, [0, 100]);
     drawScatter(scatter, processedData[currentYear], 'val', 7, [0, 100]);
-    drawScatter(scatter, processedData[currentYear], 'dur', 3, [180, 360]);
+    drawScatter(scatter, processedData[currentYear], 'dur', 3, [120, 360]);
     drawScatter(scatter, processedData[currentYear], 'acous', 9, [0, 100]);
     drawSongSection(processedData[currentYear]);
   });
@@ -336,10 +431,34 @@ function updateViz() {
   d3.select('.year').html('');
   currentSong = 0;
   d3.select('.song').html('');
+  d3.select('.radial').html('');
   draw();
 }
 
-function updateSongViz() {
+function updateSongViz(lastSong) {
   d3.select('.song').html('');
+  d3.select('.radial').html('');
+  let nodes = d3
+    .selectAll(
+      `.${processedData[currentYear][lastSong].title.replace(
+        /[^a-z0-9]/gi,
+        ''
+      )}`
+    )
+    .nodes();
+  for (let index in nodes) {
+    nodes[index].style.fill = '#0071bc';
+  }
+  nodes = d3
+    .selectAll(
+      `.${processedData[currentYear][currentSong].title.replace(
+        /[^a-z0-9]/gi,
+        ''
+      )}`
+    )
+    .nodes();
+  for (let index in nodes) {
+    nodes[index].style.fill = '#cd2026';
+  }
   drawSongSection(processedData[currentYear]);
 }
