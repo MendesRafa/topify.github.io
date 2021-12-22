@@ -43,14 +43,14 @@ function decrementSong() {
 }
 
 function goToFirstSong() {
-  currentSong = 24;
   lastSong = currentSong;
+  currentSong = 24;
   updateSongViz(lastSong);
 }
 
 function goToLastSong() {
-  currentSong = 0;
   lastSong = currentSong;
+  currentSong = 0;
   updateSongViz(lastSong);
 }
 
@@ -136,6 +136,8 @@ const titleMap = {
 };
 
 function drawScatter(canvas, data, key, position, yrange) {
+  // code for scatter plot adapted from
+  // https://www.d3-graph-gallery.com/graph/scatter_basic.html
   const height = 200;
   const width = 200;
   const margin = { left: 50, top: 50, right: 50, bottom: 40 };
@@ -223,6 +225,9 @@ function drawScatter(canvas, data, key, position, yrange) {
 }
 
 function drawBar(canvas, data) {
+  // code for bar chart adapted from
+  // https://www.d3-graph-gallery.com/graph/barplot_horizontal.html
+  // https://www.d3-graph-gallery.com/graph/barplot_animation_start.html
   const margin = { left: 100, top: 50, right: 50, bottom: 50 };
   const width = 950 - margin.left - margin.right;
   const height = 450 - margin.top - margin.bottom;
@@ -293,6 +298,8 @@ function drawBar(canvas, data) {
 }
 
 function drawSongSection(data) {
+  // code for radial chart adapted from
+  // https://yangdanny97.github.io/blog/2019/03/01/D3-Spider-Chart
   const year = d3
     .select('.song')
     .append('text')
